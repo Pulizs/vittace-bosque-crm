@@ -49,10 +49,11 @@ main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 390px;min-height:0}
 #tip{position:absolute;z-index:4;pointer-events:none;background:#14221cee;color:#fff;font-size:12.5px;padding:7px 10px;border-radius:9px;display:none;max-width:240px}
 aside{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
 .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;padding:8px;border-bottom:1px solid var(--line);background:var(--panel)}
-.tabs button{border:0;background:none;padding:7px 2px 6px;cursor:pointer;font-weight:600;font-size:11.5px;line-height:1.2;color:var(--mute);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:52px}
+.tabs button{border:0;background:none;padding:7px 0 6px;cursor:pointer;font-weight:600;font-size:11px;line-height:1.2;color:var(--mute);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:52px}
 .tabs button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tabs button:hover{background:var(--soft)}
+.tabs.many{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))}.tabs.many button{flex-direction:row;justify-content:center;min-height:40px;gap:6px;font-size:12px}.tabs.many svg{width:19px;height:19px}
 .tabs button[aria-selected=true]{color:var(--brand);background:var(--soft)}
 .body{padding:16px;overflow-y:auto;flex:1}
 h2{font-size:20px;line-height:1.15;margin:0 0 4px;letter-spacing:-.01em}
@@ -103,6 +104,7 @@ tr.click{cursor:pointer}tr.click:hover td{background:var(--soft)}
  .modes{left:10px;bottom:10px;padding:8px;max-width:calc(100% - 20px)}.modes select{margin-bottom:6px;font-size:13px}.legend{font-size:11.5px;gap:4px 10px}
  .hint{display:none}
  aside{border-left:0;border-top:1px solid var(--line);scroll-margin-top:96px}
+ .tabs.many{grid-auto-flow:column;grid-template-columns:none}.tabs.many button{flex-direction:column;min-height:52px;gap:4px;font-size:10.5px}.tabs.many svg{width:22px;height:22px}
  .tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;border-bottom:0;border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px #0000001a}
  .body{overflow:visible;padding:16px 14px 20px}
  h2{font-size:19px}
@@ -518,7 +520,7 @@ function view(){const r=state.role,v=state.view,tab=TABS[r][v][state.tab];const 
 function rows(L){return L.map(x=>`<tr class="click" data-u="${x.id}"><td data-l="Unid.">T${x.t}·${x.num}</td><td data-l="Morador">${esc(x.nome)}</td><td data-l="Situação">${tag(x.occ=='Vago'||x.occ=='Em obra'?x.occ:x.inad?'Inadimplente':'Em dia')}</td></tr>`).join('')}
 function render(keepScroll){const r=state.role;$('#who').textContent={morador:'Morador exemplo · Torre 1, apto 304',porteiro:'Portaria · turno diurno',sindico:'Síndico · gestão 2026',construtora:'Construtora · pós-obra'}[r];
  const tabs=TABS[r][state.view];if(state.tab>=tabs.length)state.tab=0;
- $('#tabs').innerHTML=tabs.map((k,i)=>`<button role="tab" aria-selected="${i==state.tab}" data-tab="${i}">${icon(TABMETA[k][1])}<span>${TABMETA[k][0]}</span></button>`).join('');
+ $('#tabs').classList.toggle('many',tabs.length>5);$('#tabs').innerHTML=tabs.map((k,i)=>`<button role="tab" aria-selected="${i==state.tab}" data-tab="${i}">${icon(TABMETA[k][1])}<span>${TABMETA[k][0]}</span></button>`).join('');
  const st=$('#panel').scrollTop;$('#panel').innerHTML=view()+'<p class="note">Dados de exemplo para demonstração. Implantação e planta extraídas dos projetos enviados.</p>';if(keepScroll)$('#panel').scrollTop=st;
  const cr=[['Condomínio',goSite]];if(state.tower)cr.push([`Torre ${state.tower}`,()=>goTower(state.tower)]);if(state.unit)cr.push([`Apto ${U(state.unit).num}`,()=>{}]);
  $('#crumbs').innerHTML='';cr.forEach(([l,f])=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;$('#crumbs').appendChild(b)});
