@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vittace Bosque CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: ferramenta de gestão calma e precisa, para síndico, morador e construtora
+   IDEA: a maquete branca de stand de vendas — o condomínio como objeto que se desmonta
+   PICTURE: implantação real das 28 torres em 3D; torre que abre em andares; planta 3D do apto
+   COLOUR and TYPE: verde Vittace (#0f5a45) dominante, papel branco de maquete, âmbar de destaque; Manrope
+   LAYOUT: cena 3D ocupando a tela, painel de CRM à direita (abaixo no celular), migalhas no topo */
+:root{color-scheme:light dark;
+--bg:light-dark(#eef1ec,#0d1512);--panel:light-dark(#ffffff,#131d19);--ink:light-dark(#14221c,#e6eee9);
+--mute:light-dark(#5b6b63,#93a59c);--line:light-dark(#dfe5df,#24312b);--brand:light-dark(#0f5a45,#4fc19a);
+--brand-ink:light-dark(#ffffff,#08130f);--soft:light-dark(#e5efe9,#1a2a23);--amber:#f0a92a;--red:#d9503a}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Manrope,system-ui,sans-serif;overflow-x:clip;height:100vh;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.logo{font-weight:800;font-size:19px;line-height:1;color:var(--brand);letter-spacing:-.02em}
+.logo small{display:block;font-weight:600;font-size:11px;color:var(--mute);letter-spacing:0;margin-top:3px}
+.roles{display:flex;background:var(--soft);border-radius:12px;padding:4px;gap:2px;margin-left:auto}
+.roles button{border:0;background:none;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:600;min-height:38px;color:var(--mute)}
+.roles button[aria-pressed=true]{background:var(--brand);color:var(--brand-ink)}
+.who{font-size:13px;color:var(--mute);white-space:nowrap}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 390px;min-height:0}
+.stage{position:relative;overflow:hidden;min-height:340px}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;transition:opacity .28s}
+.crumbs{position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;z-index:3}
+.crumbs button{border:0;background:var(--panel);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600;box-shadow:0 2px 10px #0002;min-height:38px}
+.crumbs button:last-child{background:var(--brand);color:var(--brand-ink)}
+.modes{position:absolute;left:14px;bottom:14px;z-index:3;background:var(--panel);border-radius:12px;padding:10px 12px;box-shadow:0 2px 14px #0002;max-width:calc(100% - 28px)}
+.modes select{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 8px;font-size:14px;margin-bottom:8px;width:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:var(--mute)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.hint{position:absolute;right:14px;bottom:14px;z-index:3;font-size:12.5px;color:var(--mute);background:var(--panel);padding:6px 10px;border-radius:9px;opacity:.92}
+#labels{position:absolute;inset:0;pointer-events:none;z-index:2}
+.tl{position:absolute;transform:translate(-50%,-100%);background:var(--panel);color:var(--ink);font-size:11.5px;font-weight:700;padding:2px 6px;border-radius:6px;box-shadow:0 1px 6px #0003;white-space:nowrap;pointer-events:auto;cursor:pointer}
+.tl.me{background:var(--amber);color:#1b1205}
+.rl{position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:12px;font-weight:700;color:#1d2a24;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 4px #fff}
+.rl span{display:block;font-weight:500;font-size:11px}
+.north{position:absolute;top:14px;right:14px;z-index:3;width:44px;height:44px;border-radius:50%;background:var(--panel);box-shadow:0 2px 10px #0002;display:grid;place-items:center}
+.north b{font-size:11px;position:absolute;top:3px}.north i{width:3px;height:16px;background:linear-gradient(var(--red) 50%,var(--mute) 50%);border-radius:2px;margin-top:6px;transform-origin:50% 50%}
+#tip{position:absolute;z-index:4;pointer-events:none;background:#14221cee;color:#fff;font-size:12.5px;padding:7px 10px;border-radius:9px;display:none;max-width:240px}
+aside{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.tabs{display:flex;gap:4px;padding:10px 12px 0;overflow-x:auto;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;padding:9px 11px;cursor:pointer;font-weight:600;color:var(--mute);border-bottom:2px solid transparent;white-space:nowrap;min-height:40px}
+.tabs button[aria-selected=true]{color:var(--brand);border-color:var(--brand)}
+.body{padding:16px;overflow-y:auto;flex:1}
+h2{font-size:20px;line-height:1.15;margin:0 0 4px;letter-spacing:-.01em}
+h3{font-size:14px;margin:18px 0 8px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 12px}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kpi{background:var(--soft);border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-size:24px;line-height:1.1}
+.kpi span{font-size:12.5px;color:var(--mute)}
+.list{display:flex;flex-direction:column;gap:6px}
+.item{border:1px solid var(--line);border-radius:11px;padding:9px 11px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.item p{margin:0;font-size:13px;color:var(--mute)}
+.item strong{font-size:14px}
+.tag{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--soft)}
+.tag.ok{background:#2f8f6b22;color:#2f8f6b}.tag.warn{background:#f0a92a33;color:#a86a00}.tag.bad{background:#d9503a22;color:var(--red)}
+.bar{height:8px;background:var(--soft);border-radius:8px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--brand)}
+.btn{border:0;background:var(--brand);color:var(--brand-ink);padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;min-height:42px}
+.btn.ghost{background:var(--soft);color:var(--ink)}
+.btn.sm{padding:6px 10px;min-height:32px;font-size:13px}
+form{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+input,select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:9px;padding:9px 10px;font-size:16px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.dl dt{color:var(--mute)}.dl dd{margin:0;text-align:right;font-weight:600}
+.note{font-size:12px;color:var(--mute);margin-top:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:600}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--soft)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+@media(max-width:860px){body{height:auto}main{grid-template-columns:1fr}.stage{height:62vh}aside{border-left:0;border-top:1px solid var(--line)}.body{overflow:visible}.hint{display:none}.who{display:none}}
+@media(max-width:600px){.roles{margin-left:0;width:100%}.roles button{flex:1;padding:8px 6px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Vittace Bosque<small>CRM do condomínio · Capão Raso, Curitiba</small></div>
+  <div class="roles" role="group" aria-label="Perfil de acesso">
+    <button data-role="morador" aria-pressed="true">Morador</button>
+    <button data-role="sindico" aria-pressed="false">Síndico</button>
+    <button data-role="construtora" aria-pressed="false">Construtora</button>
+  </div>
+  <div class="who" id="who"></div>
+</header>
+<main>
+  <div class="stage" id="stage">
+    <canvas id="c"></canvas>
+    <div id="labels"></div>
+    <div class="crumbs" id="crumbs"></div>
+    <div class="modes" id="modes"><select id="mode" aria-label="Colorir por"></select><div class="legend" id="legend"></div></div>
+    <div class="hint" id="hint">Arraste para girar · role para aproximar · clique numa torre</div>
+    <div id="tip"></div>
+    <div class="north" id="north" title="Norte"><b>N</b><i></i></div>
+  </div>
+  <aside>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="body" id="panel"></div>
+  </aside>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Dados: implantação (prancha 03/22) ---------- */
+// [torre, x, y na prancha, rotação°, tipo 237m²]
+const T=[[1,494,110,0],[2,383,110,0],[3,273,110,0],[4,167,110,0],[5,144,297,90,1],[6,135,383,90,1],[7,122,527,90,1],[8,111,628,90,1],
+[9,502,642,0],[10,583,642,0],[11,735,595,40,1],[12,837,537,40,1],[13,907,452,40],[14,988,384,40],[15,1069,310,40],
+[16,1104,113,0],[17,996,113,0],[18,888,113,0],[19,780,111,0],[20,562,321,0,1],[21,446,321,0,1],[22,325,321,0,1],
+[23,297,500,0],[24,408,500,0],[25,515,500,0],[26,632,471,40],[27,710,397,40],[28,790,320,40]];
+const S=0.205, W=(x,y)=>[(x-850)*S,(y-400)*S];
+const towers=T.map(([n,x,y,r,big])=>{const off=r==90?[16,0]:r==40?[12,14]:[14,18];const [wx,wz]=W(x+off[0],y+off[1]);
+ return {n,x:wx,z:wz,rot:r*Math.PI/180,big:!!big,w:big?17:16,d:big?14:13}});
+
+let seed=20260910;const rnd=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const pick=a=>a[Math.floor(rnd()*a.length)];
+const NOMES=['Ana','Bruno','Carla','Diego','Eduarda','Felipe','Gabriela','Henrique','Isabela','João','Karina','Lucas','Mariana','Nicolas','Patrícia','Rafael','Sabrina','Thiago','Vanessa','Wesley','Juliana','Marcos','Letícia','André'];
+const SOBR=['Silva','Souza','Oliveira','Pereira','Costa','Rodrigues','Almeida','Nascimento','Lima','Araújo','Ferreira','Carvalho','Gomes','Martins','Rocha','Ribeiro','Kowalski','Schmidt','Andrade','Moreira'];
+const obra={};towers.forEach(t=>{obra[t.n]=t.n<=10?100:t.n<=19?Math.round(84+rnd()*15):Math.round(38+rnd()*45)});
+const units=[];let vaga=1;
+towers.forEach(t=>{for(let f=1;f<=4;f++)for(let p=1;p<=4;p++){const r=rnd();const occ=obra[t.n]<100?'Em obra':r<.7?'Proprietário':r<.88?'Alugado':'Vago';
+ units.push({id:`T${t.n}-${f}0${p}`,t:t.n,f,p,num:`${f}0${p}`,vaga:vaga++,occ,nome:occ=='Vago'?'—':`${pick(NOMES)} ${pick(SOBR)}`,
+ inad:(occ=='Proprietário'||occ=='Alugado')&&rnd()<.08,ch:Math.max(0,Math.round(rnd()*3.2-1.6)),
+ ent:obra[t.n]<100?'Aguardando':rnd()<.9?'Entregue':'Vistoria agendada'})}});
+const U=id=>units.find(u=>u.id==id);
+const ME='T1-304';U(ME).nome='Morador Exemplo';U(ME).occ='Proprietário';U(ME).inad=false;U(ME).vaga=121;
+
+const state={role:'morador',view:'site',tower:null,unit:null,tab:0,
+ avisos:[{t:'Manutenção dos portões',d:'Portão de veículos em manutenção sexta, 8h–12h.',q:'2 dias'},{t:'Assembleia ordinária',d:'Dia 12/12 às 19h no salão de festas.',q:'5 dias'}],
+ reservas:[{a:'Salão de festas',d:'2026-12-06',u:'T4-201',s:'Aprovada'},{a:'Churrasqueira 2',d:'2026-11-29',u:ME,s:'Pendente'}],
+ chamados:[{id:1031,u:ME,tipo:'Assistência técnica',d:'Infiltração no peitoril do Quarto 02',s:'Em análise'},{id:1028,u:'T7-102',tipo:'Ocorrência',d:'Barulho após 22h na torre 07',s:'Aberto'},
+ {id:1022,u:'T3-404',tipo:'Assistência técnica',d:'Porta da sacada desalinhada',s:'Agendado'},{id:1019,u:'T9-301',tipo:'Assistência técnica',d:'Trinca no revestimento da cozinha',s:'Concluído'}],
+ encomendas:[{d:'Mercado Livre · caixa média',q:'hoje 14:20'},{d:'Correios · envelope',q:'ontem'}]};
+
+/* ---------- Cores por modo ---------- */
+const C={ok:'#2f8f6b',rent:'#6aa9d8',vago:'#c4c9c6',bad:'#d9503a',warn:'#f0b13e',base:'#eeece6',me:'#f0a92a',obra:'#d8d2c4'};
+const MODES={morador:[['me','Minha unidade']],sindico:[['real','Visual real'],['occ','Ocupação'],['inad','Inadimplência'],['ch','Chamados abertos']],construtora:[['real','Visual real'],['obra','Andamento da obra'],['ent','Entrega das unidades'],['at','Assistência técnica']]};
+let mode='me';
+function ucolor(u){switch(mode){
+ case 'real':return C.base;
+ case 'me':return u.id==ME?C.me:u.t==1?'#f3e6c8':C.base;
+ case 'occ':return u.occ=='Proprietário'?C.ok:u.occ=='Alugado'?C.rent:u.occ=='Vago'?C.vago:C.obra;
+ case 'inad':return u.occ=='Vago'||u.occ=='Em obra'?C.vago:u.inad?C.bad:C.ok;
+ case 'ch':return u.ch==0?'#dbe7e0':u.ch==1?C.warn:C.bad;
+ case 'obra':{const p=obra[u.t];return p==100?C.ok:p>=80?C.warn:'#d98b3a'}
+ case 'ent':return u.ent=='Entregue'?C.ok:u.ent=='Vistoria agendada'?C.warn:C.vago;
+ case 'at':{const n=state.chamados.filter(c=>c.u==u.id&&c.tipo=='Assistência técnica'&&c.s!='Concluído').length+(u.ch>1?1:0);return n==0?'#dbe7e0':n==1?C.warn:C.bad}}}
+const LEG={real:[['#eeece6','Fachada'],['#6d6259','Núcleo e sacadas'],['#2e3a44','Esquadrias']],me:[[C.me,'Seu apartamento'],['#f3e6c8','Sua torre']],occ:[[C.ok,'Proprietário'],[C.rent,'Alugado'],[C.vago,'Vago'],[C.obra,'Em obra']],
+ inad:[[C.ok,'Em dia'],[C.bad,'Inadimplente'],[C.vago,'Sem cobrança']],ch:[['#dbe7e0','Nenhum'],[C.warn,'1'],[C.bad,'2 ou mais']],
+ obra:[[C.ok,'Concluída'],[C.warn,'80–99%'],['#d98b3a','Abaixo de 80%']],ent:[[C.ok,'Entregue'],[C.warn,'Vistoria agendada'],[C.vago,'Aguardando']],at:[['#dbe7e0','Sem chamado'],[C.warn,'1 aberto'],[C.bad,'2 ou mais']]};
+
+/* ---------- Three.js ---------- */
+const canvas=$('#c'),stage=$('#stage');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(38,1,0.5,3000);
+const ctr=new THREE.OrbitControls(cam,canvas);ctr.enableDamping=true;ctr.maxPolarAngle=1.48;ctr.minDistance=6;ctr.maxDistance=520;
+const hemi=new THREE.HemisphereLight(0xdfeeff,0x6b7d5c,.8);scene.add(hemi);
+// Curitiba fica a 25°S: o sol da tarde vem do norte-noroeste
+const sun=new THREE.DirectionalLight(0xfff1dc,1.05);sun.position.set(-170,165,-70);sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-230,right:230,top:230,bottom:-230,far:700});sun.shadow.bias=-.0004;sun.shadow.camera.updateProjectionMatrix();scene.add(sun);
+const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.85,metalness:0},o));
+const site=new THREE.Group(),plan=new THREE.Group();scene.add(site,plan);
+// a Rua José Rodrigues Pinheiro corre para lés-nordeste (satélite): gira a implantação para o norte verdadeiro
+const SR=0.45;site.rotation.y=SR;
+
+function themeBg(){const dark=document.documentElement.dataset.theme=='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+ const cv=document.createElement('canvas');cv.width=2;cv.height=256;const x=cv.getContext('2d');const gr=x.createLinearGradient(0,0,0,256);
+ if(dark){gr.addColorStop(0,'#2a4a68');gr.addColorStop(.6,'#8aa7b8');gr.addColorStop(1,'#c9d3cc')}else{gr.addColorStop(0,'#7fb0d9');gr.addColorStop(.55,'#cfe2ee');gr.addColorStop(1,'#eef1ea')}
+ x.fillStyle=gr;x.fillRect(0,0,2,256);scene.background=new THREE.CanvasTexture(cv);
+ scene.fog=new THREE.Fog(dark?0xc9d3cc:0xe6ece6,420,1300);hemi.intensity=dark?.75:.85;sun.intensity=dark?.95:1.1}
+themeBg();new MutationObserver(themeBg).observe(document.documentElement,{attributes:true});matchMedia('(prefers-color-scheme: dark)').addEventListener('change',themeBg);
+
+/* ---------- Geometria auxiliar ---------- */
+const gb=(w,h,d,x,y,z,ry=0)=>{const g=new THREE.BoxGeometry(w,h,d);if(ry)g.rotateY(ry);g.translate(x,y,z);return g};
+const merge=a=>THREE.BufferGeometryUtils.mergeBufferGeometries(a);
+const mesh=(geos,mat,sh=true)=>{const m=new THREE.Mesh(merge(geos),mat);m.castShadow=sh;m.receiveShadow=true;return m};
+const inPoly=(x,y,P)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const[xi,yi]=P[i],[xj,yj]=P[j];if(((yi>y)!=(yj>y))&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c};
+const segDist=(px,py,[ax,ay],[bx,by])=>{const dx=bx-ax,dy=by-ay,t=Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy)));return Math.hypot(px-ax-t*dx,py-ay-t*dy)};
+const FAC=0xeeece6,TAUPE=0x6d6259,GLASS=0x2e3a44;
+
+/* ---------- Terreno ---------- */
+const flat=(pts,col,y)=>{const sh=new THREE.Shape(pts.map(([x,yy])=>{const[a,b]=W(x,yy);return new THREE.Vector2(a,-b)}));
+ const m=new THREE.Mesh(new THREE.ShapeGeometry(sh),M(col));m.rotation.x=-Math.PI/2;m.position.y=y;m.receiveShadow=true;site.add(m);return m};
+{const g=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),M(0x7d9467));g.rotation.x=-Math.PI/2;g.position.y=-.05;g.receiveShadow=true;site.add(g)}
+const LOT=[[105,40],[1580,66],[1700,150],[1700,185],[1180,420],[860,720],[560,770],[60,720],[60,600]];
+const APP=[[1700,185],[1700,1100],[-200,1100],[-200,760],[60,720],[560,770],[860,720],[1180,420]];
+flat(LOT,0x8fae78,0.02);flat(APP,0x4d6e43,0.01);
+const RD=[[1560,190],[1250,232],[215,232],[215,600],[660,600],[1065,245]];
+const road=(pts,w,col,y)=>{const a=[];for(let i=0;i<pts.length-1;i++){const[p,q]=W(...pts[i]),[r,s]=W(...pts[i+1]);const L=Math.hypot(r-p,s-q);
+ a.push(gb(L+w,.06,w,0,0,0,-Math.atan2(s-q,r-p)).translate((p+r)/2,y,(q+s)/2))}site.add(mesh(a,M(col,{roughness:.95}),false))};
+road(RD,21,0x74787a,.05);road(RD,7,0x4e5355,.08);road([[640,232],[640,30]],9,0x4e5355,.08);
+road([[-300,18],[1760,40]],13,0x3f4345,.04);road([[-300,30],[1760,52]],17,0xc9c6bf,.03);road([[45,22],[45,1100]],10,0x3f4345,.04);
+// demarcação das vagas (448 vagas de moradores no quadro de vagas)
+{const o=new THREE.Object3D(),mats=[];for(let i=0;i<RD.length-1;i++){const[p,q]=W(...RD[i]),[r,s]=W(...RD[i+1]);const L=Math.hypot(r-p,s-q),ux=(r-p)/L,uz=(s-q)/L,ang=-Math.atan2(s-q,r-p);
+ for(let d=6;d<L-6;d+=2.5)for(const side of[-1,1]){o.position.set(p+ux*d-uz*side*7,.1,q+uz*d+ux*side*7);o.rotation.set(0,ang,0);o.updateMatrix();mats.push(o.matrix.clone())}}
+ const im=new THREE.InstancedMesh(new THREE.BoxGeometry(.12,.02,5),M(0xf2f2ee),mats.length);mats.forEach((m,i)=>im.setMatrixAt(i,m));site.add(im)}
+// gradil preto no perímetro
+{const a=[];LOT.forEach((p,i)=>{const[x1,z1]=W(...p),[x2,z2]=W(...LOT[(i+1)%LOT.length]);const L=Math.hypot(x2-x1,z2-z1);a.push(gb(L,2,.08,0,0,0,-Math.atan2(z2-z1,x2-x1)).translate((x1+x2)/2,1,(z1+z2)/2))});
+ site.add(mesh(a,M(0x1f2326,{transparent:true,opacity:.55,roughness:.6}),false))}
+const box=(w,h,d,col,x,y,z,ry=0,o)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(col,o));m.position.set(x,y,z);m.rotation.y=ry;m.castShadow=m.receiveShadow=true;site.add(m);return m};
+// portaria com pórtico (como no render da construtora)
+{const[x,z]=W(640,48);box(1.2,7,1.6,TAUPE,x-8,3.5,z);box(1.2,7,1.6,TAUPE,x+8,3.5,z);box(22,1.6,3.4,TAUPE,x+2,7.6,z);
+ box(4.5,3,4,0xbab3aa,x-12.5,1.5,z+3);box(4.6,1.4,4.1,GLASS,x-12.5,1.8,z+3,0,{roughness:.2,metalness:.3})}
+// lazer: quadra de areia, poliesportiva, salão de festas, playground
+{const[a,b]=W(410,405);box(16,.12,9,0xe2cf9e,a,.08,b);const[c,d]=W(497,405);box(19.4,.08,11.4,0xffffff,c,.06,d);box(18,.12,10,0x2f7f86,c,.08,d);box(.15,.13,10,0xffffff,c,.09,d);
+ const[e,f]=W(612,368);box(14,3.4,9,0xf3f1ea,e,1.7,f);box(14.2,3.2,9.2,0x8fb9b0,e,1.7,f+.01,0,{transparent:true,opacity:.55,roughness:.15});box(15.5,.35,10.5,TAUPE,e,3.6,f);
+ const[h,i]=W(578,425);const pg=new THREE.Mesh(new THREE.CylinderGeometry(6,6,.15,40),M(0x3f86c4));pg.position.set(h,.08,i);pg.receiveShadow=true;site.add(pg);box(3,2.2,1.2,0xe8b23a,h,1.1,i)}
+
+/* ---------- Vegetação e entorno ---------- */
+{const o=new THREE.Object3D(),col=new THREE.Color();
+ const inst=(geo,mat,list,colors)=>{const im=new THREE.InstancedMesh(geo,mat,list.length);list.forEach((m,i)=>{im.setMatrixAt(i,m);if(colors)im.setColorAt(i,col.set(colors[i]))});im.castShadow=true;im.receiveShadow=true;site.add(im)};
+ const at=(x,y,z,sx,sy,sz,ry=0)=>{o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.rotation.set(0,ry,0);o.updateMatrix();return o.matrix.clone()};
+ const crowns=[],ccol=[],trunks=[],arTop=[],palmT=[],palmC=[],houses=[],hcol=[],roofs=[],rcol=[];
+ const G=['#2f5a33','#3b6b3a','#24492b','#4a7a3e','#335f2f'];
+ // mata da APP e bosque do outro lado da rua, com araucárias
+ const forest=(n,x0,x1,y0,y1,ok)=>{let k=0,tries=0;while(k<n&&tries++<n*20){const x=x0+rnd()*(x1-x0),y=y0+rnd()*(y1-y0);if(!ok(x,y))continue;const[a,b]=W(x,y);k++;
+  if(rnd()<.22){const h=12+rnd()*8;trunks.push(at(a,h/2,b,.35,h,.35));arTop.push(at(a,h,b,3+rnd()*1.5,1.6,3+rnd()*1.5,rnd()*3))}
+  else{const s=3+rnd()*3.2;crowns.push(at(a,s*1.3+2,b,s,s*.85,s,rnd()*3));ccol.push(pick(G))}}};
+ forest(900,-200,1700,170,1100,(x,y)=>inPoly(x,y,APP));
+ forest(360,-300,950,-420,0,()=>true);
+ // palmeiras e árvores ornamentais nos jardins
+ let k=0,tries=0;while(k<90&&tries++<4000){const x=110+rnd()*1500,y=50+rnd()*700;if(!inPoly(x,y,LOT))continue;
+  if(RD.some((p,i)=>i<RD.length-1&&segDist(x,y,p,RD[i+1])<62))continue;const[a,b]=W(x,y);if(towers.some(t=>Math.hypot(t.x-a,t.z-b)<15))continue;k++;
+  if(rnd()<.6){const h=7+rnd()*4;palmT.push(at(a,h/2,b,.22,h,.22));palmC.push(at(a,h,b,2.6,.9,2.6,rnd()*3))}else{const s=1.8+rnd()*1.3;crowns.push(at(a,s+2.2,b,s,s,s));ccol.push('#5d8f45');trunks.push(at(a,1.2,b,.25,2.4,.25))}}
+ // bairro: casas a leste e a oeste, galpões ao norte
+ const RF=['#a8563a','#b86b45','#8e8a84','#6f6a66','#c4774f','#9aa0a3'];
+ const block=(x0,x1,y0,y1,step,ok,big)=>{for(let x=x0;x<x1;x+=step)for(let y=y0;y<y1;y+=step){if(rnd()<.18||!ok(x,y))continue;const[a,b]=W(x+rnd()*12,y+rnd()*12);
+  const w=big?18+rnd()*25:7+rnd()*4,d=big?14+rnd()*20:9+rnd()*4,h=big?6+rnd()*4:3+(rnd()<.3?3:0),r=rnd()*.15;houses.push(at(a,h/2,b,w,h,d,r));hcol.push(big?'#d4d6d6':pick(['#e8e2d6','#f1ece4','#d9d4ca','#ece6dc']));
+  roofs.push(at(a,h+.35,b,w+.6,.7,d+.6,r));rcol.push(big?'#b9bec0':pick(RF))}};
+ block(1730,2400,-250,900,58,(x,y)=>y<160+(x-1700)*2||x>1760,false);block(-450,10,60,740,58,()=>true,false);block(1000,1750,-420,-40,150,()=>rnd()<.6,true);
+ const BX=new THREE.BoxGeometry(1,1,1);
+ inst(new THREE.IcosahedronGeometry(1,1),M(0xffffff,{flatShading:true}),crowns,ccol);inst(new THREE.CylinderGeometry(.5,.7,1,6),M(0x5b4636),trunks);
+ inst(new THREE.CylinderGeometry(1,.55,1,9),M(0x2b4f2e,{flatShading:true}),arTop);inst(new THREE.CylinderGeometry(.5,.8,1,6),M(0x7b6a55),palmT);
+ inst(new THREE.ConeGeometry(1,1,7),M(0x5a9a3e,{flatShading:true}),palmC);inst(BX,M(0xffffff),houses,hcol);inst(BX,M(0xffffff),roofs,rcol)}
+
+/* ---------- Torres (fachada do render: branco, núcleo taupe, sacadas com vidro) ---------- */
+const FH=2.9,pickSite=[],labels=$('#labels');
+towers.forEach(t=>{const grp=new THREE.Group();grp.position.set(t.x,0,t.z);grp.rotation.y=t.rot;site.add(grp);t.g=grp;t.floors=[];t.units=[];t.solid=[];
+ {const p=new THREE.Mesh(gb(t.w+8,.3,t.d+8,0,.15,0),M(0xd9d6ce));p.receiveShadow=true;grp.add(p)}
+ const uw=(t.w-2.6)/2,ud=t.d/2-.12,h=FH-.22;
+ for(let f=1;f<=4;f++){const fl=new THREE.Group();fl.position.y=.3+(f-1)*FH;grp.add(fl);t.floors.push(fl);
+  const white=[gb(t.w+.3,.22,t.d+.3,0,FH-.11,0)],taupe=[gb(2.6,FH,t.d+.6,0,FH/2,0)],glass=[gb(2.62,1.9,.05,0,1.5,t.d/2+.31),gb(2.62,1.9,.05,0,1.5,-t.d/2-.31)],rail=[];
+  [[1,-1,1],[2,-1,-1],[3,1,-1],[4,1,1]].forEach(([p,sx,sz])=>{const u=U(`T${t.n}-${f}0${p}`);
+   const cx=sx*(uw/2+1.3),cz=sz*(ud/2+.06),z0=cz+sz*ud/2,x0=cx+sx*uw/2;
+   const m=new THREE.Mesh(new THREE.BoxGeometry(uw,h,ud),M(C.base,{transparent:true}));
+   m.position.set(cx,h/2,cz);m.castShadow=m.receiveShadow=true;m.userData={u,t};fl.add(m);t.units.push(m);pickSite.push(m);
+   glass.push(gb(1.3,1.2,.1,cx-sx*uw*.2,1.55,z0),gb(.9,.6,.1,cx+sx*uw*.28,1.85,z0),gb(.1,1.2,1.3,x0,1.55,cz-sz*ud*.25));
+   const bz=cz+sz*ud*.2;   // sacada com churrasqueira na face lateral
+   white.push(gb(1.35,.16,2.7,x0+sx*.67,.08,bz));taupe.push(gb(1.35,h,.16,x0+sx*.67,h/2,bz-1.35),gb(1.35,h,.16,x0+sx*.67,h/2,bz+1.35));
+   glass.push(gb(.1,2.1,1.7,x0,1.05,bz));rail.push(gb(.05,1.05,2.55,x0+sx*1.3,.68,bz))});
+  if(f==4){white.push(gb(t.w+.3,.9,.2,0,FH+.45,t.d/2+.05),gb(t.w+.3,.9,.2,0,FH+.45,-t.d/2-.05),gb(.2,.9,t.d+.3,t.w/2+.05,FH+.45,0),gb(.2,.9,t.d+.3,-t.w/2-.05,FH+.45,0));
+   taupe.push(gb(2.6,2.6,4.2,0,FH+1.3,0));}
+  const add=(geos,mat,op=1,sh=true)=>{const ms=mesh(geos,mat,sh);ms.userData.op=op;fl.add(ms);t.solid.push(ms)};
+  add(white,M(FAC,{transparent:true}));add(taupe,M(TAUPE,{transparent:true}));add(glass,M(GLASS,{transparent:true,roughness:.2,metalness:.4}),1,false);
+  add(rail,M(0xa9c3cf,{transparent:true,opacity:.45,roughness:.1}),.45,false);
+  if(f==4){add([gb(t.w-.2,.06,t.d-.2,0,FH+.03,0)],M(0xb9bcba,{transparent:true}),1,false)}}
+ const lb=document.createElement('div');lb.className='tl';lb.textContent=`T${String(t.n).padStart(2,'0')}`;lb.onclick=()=>goTower(t.n);labels.appendChild(lb);t.lb=lb;
+ if(!RM)t.floors.forEach((fl,i)=>{fl.scale.y=.001;fl.position.y=.3+i*FH})});
+
+function paint(){towers.forEach(t=>t.units.forEach(m=>m.material.color.set(ucolor(m.userData.u))));
+ const L=LEG[mode];$('#legend').innerHTML=L.map(([c,l])=>`<span><i style="background:${c}"></i>${esc(l)}</span>`).join('')}
+
+const HOME=[[-215,165,215],[10,0,-10]];
+/* ---------- Animação ---------- */
+const tweens=[];const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+function tween(dur,fn,delay=0){return new Promise(res=>{if(RM){fn(1);res();return}tweens.push({t0:performance.now()+delay,dur,fn,res})})}
+function fly(pos,tgt,dur=1400){const p0=cam.position.clone(),t0=ctr.target.clone(),P=new THREE.Vector3(...pos),G=new THREE.Vector3(...tgt);
+ const lift=Math.max(0,p0.distanceTo(P)*.18);
+ return tween(dur,k=>{const e=ease(k);cam.position.lerpVectors(p0,P,e);cam.position.y+=Math.sin(Math.PI*e)*lift;ctr.target.lerpVectors(t0,G,e)})}
+
+/* ---------- Planta 3D do apartamento (Planta tipo, unidade 304) ---------- */
+const WOOD=0xc9a47e,PORC=0xe4e2dc;
+const ROOMS=[['Cozinha',5.13,0,0,4.13,1.58,PORC],['A. serviço',1.80,4.13,0,4.93,1.58,PORC],['Sacada',4.60,4.93,.76,6.26,3.92,0xbdb6ab],
+ ['Estar / Jantar',11.63,0,1.58,4.93,3.92,WOOD],['I.S.',2.52,0,3.92,2.41,5.06,PORC],['Circulação',2.00,2.41,3.92,3.37,6.22,WOOD],
+ ['Quarto 03',5.88,3.37,3.92,6.19,6.22,WOOD],['Quarto 02',7.84,0,5.06,2.41,8.53,WOOD],['Quarto 01',9.00,2.41,6.22,6.19,8.74,WOOD]];
+// [x1,z1,x2,z2, aberturas [ini,fim,tipo]] tipo: p=porta, j=janela, v=porta de vidro
+const WALLS=[[0,0,4.93,0],[0,0,0,8.53,[[.2,1.0,'p']]],[0,8.53,2.41,8.53,[[.47,1.94,'j']]],[2.41,8.53,2.41,8.74],[2.41,8.74,6.19,8.74,[[1.2,2.67,'j']]],
+ [6.19,8.74,6.19,3.92,[[3.1,4.27,'j']]],[4.93,0,4.93,.76],[4.93,.76,6.26,.76],[4.13,0,4.13,1.58,[[.4,1.0,'p']]],[4.13,1.58,4.93,1.58],
+ [4.93,.76,4.93,3.92,[[1.0,2.47,'v']]],[0,3.92,2.41,3.92],[3.37,3.92,6.19,3.92],[2.41,3.92,2.41,5.06,[[.25,.85,'p']]],[0,5.06,2.41,5.06],
+ [2.41,5.06,2.41,8.53,[[.4,1.1,'p']]],[3.37,3.92,3.37,6.22,[[1.4,2.1,'p']]],[2.41,6.22,6.19,6.22,[[.12,.82,'p']]]];
+// [largura, altura, profundidade, x, z, cor]
+const FURN=[[3.2,.9,.6,.3,.08,0xf4f2ee],[3.2,.05,.62,.3,.9,0xdedbd4],[1.4,.5,1.9,3.6,6.75,0xf3efe8],[1.4,1.0,.08,3.6,6.67,0x9b7451],[.9,.45,1.9,.15,6.5,0xf3efe8],[.9,.45,1.9,1.35,6.5,0xf3efe8],
+ [.9,.45,1.9,5.1,4.1,0xf3efe8],[2.1,.8,.85,1.6,3.0,0xd8d0c2],[1.0,.75,1.0,.6,1.9,0xefeeea],[.4,.4,.6,1.25,4.35,0xffffff],[.6,.85,.5,.15,4.3,0xffffff],[1.6,1.2,.06,1.85,1.62,0x8a6a4c]];
+function buildPlan(u){plan.clear();const g=new THREE.Group();plan.add(g);
+ const mx=(u.p==1||u.p==2)?-1:1,mz=(u.p==2||u.p==3)?-1:1;g.scale.set(mx,1,mz);g.position.set(-mx*3.1,0,-mz*4.37);
+ const fl=new THREE.Mesh(new THREE.BoxGeometry(7.2,.2,9.6),M(0xcfcabd));fl.position.set(3.1,-.1,4.37);fl.receiveShadow=true;g.add(fl);
+ const rl=[];ROOMS.forEach(([n,a,x1,z1,x2,z2,c])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(x2-x1,.04,z2-z1),M(c,{side:THREE.DoubleSide}));
+  m.position.set((x1+x2)/2,.02,(z1+z2)/2);m.receiveShadow=true;g.add(m);rl.push({n,a,o:m})});
+ const wm=M(0xf7f5ef,{side:THREE.DoubleSide}),glass=M(0x9fd0e6,{transparent:true,opacity:.35,side:THREE.DoubleSide}),H=1.4,wallMeshes=[];
+ const seg=(x1,z1,x2,z2,y0,y1,mat,t=.14)=>{const L=Math.hypot(x2-x1,z2-z1);if(L<.01)return;const m=new THREE.Mesh(new THREE.BoxGeometry(L+t,y1-y0,t),mat);
+  m.position.set((x1+x2)/2,(y0+y1)/2,(z1+z2)/2);m.rotation.y=-Math.atan2(z2-z1,x2-x1);m.castShadow=m.receiveShadow=true;g.add(m);wallMeshes.push(m)};
+ WALLS.forEach(([x1,z1,x2,z2,ops=[]])=>{const L=Math.hypot(x2-x1,z2-z1),dx=(x2-x1)/L,dz=(z2-z1)/L,P=s=>[x1+dx*s,z1+dz*s];let s=0;
+  [...ops].sort((a,b)=>a[0]-b[0]).forEach(([a,b,k])=>{seg(...P(s),...P(a),0,H,wm);
+   if(k=='j'){seg(...P(a),...P(b),0,1.0,wm);seg(...P(a),...P(b),1.0,H,glass,.04)}
+   else if(k=='v')seg(...P(a),...P(b),0,H,glass,.04);s=b});seg(...P(s),...P(L),0,H,wm)});
+ seg(6.26,.76,6.26,3.92,0,1.1,glass,.05);seg(6.26,.76,6.26,3.92,1.05,1.12,M(0x7c8580),.06);
+ FURN.forEach(([w,h,d,x,z,c])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c));m.position.set(x+w/2,h/2+.04,z+d/2);m.castShadow=true;g.add(m)});
+ labels.querySelectorAll('.rl').forEach(e=>e.remove());
+ rl.forEach(r=>{const e=document.createElement('div');e.className='rl';e.innerHTML=`${esc(r.n)}<span>${r.a.toFixed(2).replace('.',',')} m²</span>`;labels.appendChild(e);r.e=e});
+ plan.userData={rl,walls:wallMeshes};
+ if(!RM)wallMeshes.forEach((m,i)=>{const y=m.position.y,h=m.scale.y;m.scale.y=.001;m.position.y=0;tween(700,k=>{m.scale.y=Math.max(.001,ease(k));m.position.y=y*ease(k)},120+i*25)})}
+
+/* ---------- Navegação ---------- */
+function setOpacity(t,o){t.units.forEach(m=>{m.material.opacity=o;m.material.depthWrite=o>.5});t.solid.forEach(m=>{m.material.opacity=(m.userData.op||1)*o;m.material.depthWrite=o>.5})}
+function explode(t,on){return tween(900,k=>{const e=ease(on?k:1-k);t.floors.forEach((fl,i)=>fl.position.y=.3+i*(FH+e*3.2))})}
+let busy=false;
+async function goSite(){if(busy)return;busy=true;tip.style.display='none';const prev=state.tower&&towers.find(t=>t.n==state.tower);
+ if(state.view=='unit')await swapTo(()=>{plan.visible=false;site.visible=true;planLight(false);clearRoomLabels()});
+ state.view='site';state.tower=null;state.unit=null;state.tab=0;render();
+ towers.forEach(t=>setOpacity(t,1));if(prev)explode(prev,false);
+ await fly(HOME[0],HOME[1]);busy=false}
+async function goTower(n,fromUnit){if(busy)return;busy=true;const t=towers.find(x=>x.n==n);
+ if(state.view=='unit')await swapTo(()=>{plan.visible=false;site.visible=true;planLight(false);clearRoomLabels()});
+ const prev=state.tower&&state.tower!=n&&towers.find(x=>x.n==state.tower);if(prev)explode(prev,false);
+ state.view='tower';state.tower=n;state.unit=null;state.tab=0;render();
+ towers.forEach(x=>setOpacity(x,x.n==n?1:.12));
+ const a=t.rot+SR,wc=new THREE.Vector3();t.g.getWorldPosition(wc);
+ const dir=new THREE.Vector3(-Math.sin(a)+.6*Math.cos(a),0,-Math.cos(a)-.6*Math.sin(a)).normalize();
+ const p=[wc.x+dir.x*44,30,wc.z+dir.z*44];explode(t,true);await fly(p,[wc.x,10,wc.z]);busy=false}
+async function goUnit(id){if(busy)return;const u=U(id);
+ if(state.role=='morador'&&id!=ME){tipShow(`Apto ${u.num} · Torre ${u.t}: acesso restrito. Moradores só abrem a própria unidade.`,null,2200);return}
+ busy=true;if(state.view!='tower'||state.tower!=u.t){busy=false;await goTower(u.t);busy=true}
+ const t=towers.find(x=>x.n==u.t);const m=t.units.find(m=>m.userData.u.id==id);const wp=new THREE.Vector3();m.getWorldPosition(wp);
+ await fly([wp.x+8,wp.y+8,wp.z+10],[wp.x,wp.y,wp.z],900);
+ state.view='unit';state.unit=id;state.tab=0;render();
+ await swapTo(()=>{site.visible=false;plan.visible=true;planLight(true);buildPlan(u);cam.position.set(8,17,11);ctr.target.set(0,0,0)});
+ await fly([5,14,8.5],[0,0,.3],900);busy=false}
+function planLight(on){const c=sun.shadow.camera;if(on){sun.position.set(-8,60,18);Object.assign(c,{left:-14,right:14,top:14,bottom:-14,far:120});hemi.intensity=.55;sun.intensity=.95}
+ else{sun.position.set(-170,165,-70);Object.assign(c,{left:-230,right:230,top:230,bottom:-230,far:700});themeBg()}c.updateProjectionMatrix()}
+function clearRoomLabels(){labels.querySelectorAll('.rl').forEach(e=>e.remove());plan.userData.rl=[]}
+async function swapTo(fn){canvas.style.opacity=0;await new Promise(r=>setTimeout(r,RM?0:280));fn();canvas.style.opacity=1}
+
+/* ---------- Interação ---------- */
+const ray=new THREE.Raycaster(),mv=new THREE.Vector2(),tip=$('#tip');let tipTimer,timed=false;
+function tipShow(txt,ev,ms){tip.textContent=txt;tip.style.display='block';const r=stage.getBoundingClientRect();
+ const x=ev?ev.clientX-r.left+14:r.width/2-110,y=ev?ev.clientY-r.top+14:70;tip.style.left=Math.min(x,r.width-250)+'px';tip.style.top=y+'px';
+ clearTimeout(tipTimer);timed=!!ms;if(ms)tipTimer=setTimeout(()=>{tip.style.display='none';timed=false},ms)}
+function hit(ev){const r=canvas.getBoundingClientRect();mv.set((ev.clientX-r.left)/r.width*2-1,-(ev.clientY-r.top)/r.height*2+1);ray.setFromCamera(mv,cam);
+ if(!site.visible)return null;const arr=state.view=='tower'?towers.find(t=>t.n==state.tower).units:pickSite;const h=ray.intersectObjects(arr,false)[0];return h&&h.object}
+let hov=null;
+canvas.addEventListener('pointermove',ev=>{const o=hit(ev);if(hov&&hov!=o){hov.material.emissive.set(0);}hov=o;
+ if(!o){if(!timed)tip.style.display='none';canvas.style.cursor='';return}
+ o.material.emissive.set(0x333322);canvas.style.cursor='pointer';const u=o.userData.u;
+ tipShow(state.view=='tower'?`Apto ${u.num} · ${u.f}º andar${state.role!='morador'?` · ${u.nome}`:''}`:`Torre ${u.t} · 16 aptos · obra ${obra[u.t]}%`,ev)});
+let down;canvas.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+canvas.addEventListener('pointerup',ev=>{if(!down||Math.hypot(ev.clientX-down[0],ev.clientY-down[1])>5)return;const o=hit(ev);if(!o)return;
+ if(state.view=='site')goTower(o.userData.u.t);else if(state.view=='tower')goUnit(o.userData.u.id)});
+
+/* ---------- Painel CRM ---------- */
+const tag=s=>{const c=/Conclu|Aprov|Entregue|Em dia|Pago/.test(s)?'ok':/Aberto|Inadimpl/.test(s)?'bad':'warn';return `<span class="tag ${c}">${esc(s)}</span>`};
+const uName=id=>{const u=U(id);return `Torre ${u.t} · ${u.num}`};
+const TABS={
+ morador:{site:['Início','Reservas','Chamados','Encomendas'],tower:['Início','Reservas','Chamados','Encomendas'],unit:['Meu apto','Chamados']},
+ sindico:{site:['Visão geral','Moradores','Ocorrências','Comunicados','Reservas'],tower:['Torre','Moradores','Ocorrências'],unit:['Unidade','Histórico']},
+ construtora:{site:['Obra','Assistência','Entregas','Documentos'],tower:['Torre','Assistência'],unit:['Unidade','Assistência']}};
+function kpis(list){return `<div class="kpis">${list.map(([v,l])=>`<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>`}
+function chamadosList(f){const L=state.chamados.filter(f);return L.length?`<div class="list">${L.map(c=>`<div class="item"><div><strong>#${c.id} · ${esc(c.tipo)}</strong><p>${esc(c.d)} · ${esc(uName(c.u))}</p></div><div>${tag(c.s)}${state.role!='morador'&&c.s!='Concluído'?`<br><button class="btn sm ghost" data-adv="${c.id}" style="margin-top:6px">Avançar</button>`:''}</div></div>`).join('')}</div>`:'<p class="sub">Nenhum chamado.</p>'}
+const FLOW=['Aberto','Em análise','Agendado','Concluído'];
+function chamadoForm(u){return `<h3>Abrir chamado</h3><form id="fch"><select name="tipo"><option>Assistência técnica</option><option>Ocorrência</option><option>Manutenção área comum</option></select>
+ <textarea name="d" rows="3" required placeholder="Descreva o problema e o cômodo"></textarea><button class="btn">Enviar chamado</button></form>`}
+function unitDl(u,full){return `<dl class="dl"><dt>Torre / apto</dt><dd>${u.t} / ${u.num}</dd><dt>Pavimento</dt><dd>${u.f}º</dd><dt>Tipologia</dt><dd>3 quartos</dd><dt>Área útil</dt><dd>50,40 m²</dd><dt>Vaga</dt><dd>${u.vaga}</dd>
+ ${full?`<dt>Morador</dt><dd>${esc(u.nome)}</dd><dt>Situação</dt><dd>${esc(u.occ)}</dd><dt>Financeiro</dt><dd>${u.occ=='Vago'||u.occ=='Em obra'?'—':u.inad?'Inadimplente':'Em dia'}</dd>`:''}
+ <dt>Entrega</dt><dd>${esc(u.ent)}</dd></dl>`}
+function view(){const r=state.role,v=state.view,tab=TABS[r][v][state.tab];const t=state.tower,u=state.unit&&U(state.unit),me=U(ME);
+ const occ=units.filter(x=>x.occ!='Vago'&&x.occ!='Em obra'),inadN=units.filter(x=>x.inad).length;
+ if(r=='morador'){
+  if(tab=='Início')return `<h2>Olá, morador</h2><p class="sub">Torre ${me.t} · Apto ${me.num} · Vaga ${me.vaga}</p>
+   ${kpis([['R$ 486,20','Boleto de dezembro · vence 10/12'],[String(state.reservas.filter(x=>x.u==ME).length),'Reservas suas'],[String(state.chamados.filter(c=>c.u==ME&&c.s!='Concluído').length),'Chamados abertos'],[String(state.encomendas.length),'Encomendas na portaria']])}
+   <button class="btn" id="gome" style="margin-top:12px;width:100%">Ver meu apartamento em 3D</button>
+   <h3>Avisos do síndico</h3><div class="list">${state.avisos.map(a=>`<div class="item"><div><strong>${esc(a.t)}</strong><p>${esc(a.d)}</p></div><span class="tag">${esc(a.q)}</span></div>`).join('')}</div>`;
+  if(tab=='Reservas')return `<h2>Reservas</h2><p class="sub">Áreas comuns do condomínio</p><div class="list">${state.reservas.filter(x=>x.u==ME).map(x=>`<div class="item"><div><strong>${esc(x.a)}</strong><p>${esc(x.d.split('-').reverse().join('/'))}</p></div>${tag(x.s)}</div>`).join('')||'<p class="sub">Nenhuma reserva.</p>'}</div>
+   <h3>Nova reserva</h3><form id="fres"><select name="a"><option>Salão de festas</option><option>Churrasqueira 1</option><option>Churrasqueira 2</option><option>Quadra poliesportiva</option><option>Quadra de areia</option></select><input type="date" name="d" required value="2026-12-13"><button class="btn">Solicitar reserva</button></form>`;
+  if(tab=='Chamados'||tab=='Meu apto'&&false)return `<h2>Meus chamados</h2><p class="sub">Assistência técnica vai direto para a construtora; ocorrências, para o síndico.</p>${chamadosList(c=>c.u==ME)}${chamadoForm(me)}`;
+  if(tab=='Encomendas')return `<h2>Encomendas</h2><p class="sub">Registradas pela portaria</p><div class="list">${state.encomendas.map(e=>`<div class="item"><div><strong>${esc(e.d)}</strong><p>Chegou ${esc(e.q)}</p></div><span class="tag warn">Retirar</span></div>`).join('')}</div>`;
+  if(tab=='Meu apto')return `<h2>Apartamento ${u.num}</h2><p class="sub">Planta tipo de 3 quartos com sacada e churrasqueira</p>${unitDl(u,false)}<h3>Cômodos</h3><div class="list">${ROOMS.map(r=>`<div class="item"><strong>${esc(r[0])}</strong><span>${r[1].toFixed(2).replace('.',',')} m²</span></div>`).join('')}</div>`}
+ if(r=='sindico'){
+  if(tab=='Visão geral')return `<h2>${Math.round(inadN/occ.length*100)}% de inadimplência</h2><p class="sub">${inadN} de ${occ.length} unidades habitadas com boleto em atraso</p>
+   ${kpis([['448','Unidades em 28 torres'],[Math.round(occ.length/448*100)+'%','Ocupação'],[String(state.chamados.filter(c=>c.s!='Concluído').length),'Chamados abertos'],[String(state.reservas.filter(x=>x.s=='Pendente').length),'Reservas a aprovar']])}
+   <h3>Inadimplência por torre</h3>${towers.map(t=>{const us=units.filter(x=>x.t==t.n&&x.occ!='Vago'&&x.occ!='Em obra');const n=us.filter(x=>x.inad).length;return us.length&&n?`<div style="font-size:13px;margin-top:6px">Torre ${t.n} · ${n} de ${us.length}<div class="bar"><i style="width:${n/us.length*100}%;background:var(--red)"></i></div></div>`:''}).join('')}`;
+  if(tab=='Moradores'){const L=units.filter(x=>!t||x.t==t);return `<h2>Moradores${t?` · Torre ${t}`:''}</h2><input id="q" placeholder="Buscar por nome, torre ou apto" style="width:100%;margin:6px 0 10px"><table><thead><tr><th>Unid.</th><th>Morador</th><th>Situação</th></tr></thead><tbody id="tb">${rows(L)}</tbody></table>`}
+  if(tab=='Ocorrências')return `<h2>Chamados${t?` · Torre ${t}`:''}</h2><p class="sub">Avance o status para manter o morador informado</p>${chamadosList(c=>!t||U(c.u).t==t)}`;
+  if(tab=='Comunicados')return `<h2>Comunicados</h2><p class="sub">Aparecem na tela inicial de todos os moradores</p><form id="fav"><input name="t" required placeholder="Título"><textarea name="d" rows="3" required placeholder="Mensagem"></textarea><button class="btn">Publicar comunicado</button></form><h3>Publicados</h3><div class="list">${state.avisos.map(a=>`<div class="item"><div><strong>${esc(a.t)}</strong><p>${esc(a.d)}</p></div></div>`).join('')}</div>`;
+  if(tab=='Reservas')return `<h2>Reservas</h2><div class="list">${state.reservas.map((x,i)=>`<div class="item"><div><strong>${esc(x.a)}</strong><p>${esc(x.d.split('-').reverse().join('/'))} · ${esc(uName(x.u))}</p></div><div>${tag(x.s)}${x.s=='Pendente'?`<br><button class="btn sm" data-apr="${i}" style="margin-top:6px">Aprovar</button>`:''}</div></div>`).join('')}</div>`;
+  if(tab=='Torre'){const us=units.filter(x=>x.t==t);return `<h2>Torre ${t}</h2><p class="sub">4 pavimentos · 16 apartamentos · clique num apto</p>${kpis([[String(us.filter(x=>x.occ!='Vago').length),'Habitadas'],[String(us.filter(x=>x.inad).length),'Inadimplentes'],[String(us.reduce((a,x)=>a+x.ch,0)),'Chamados no ano'],[obra[t]+'%','Obra']])}<h3>Unidades</h3><table><tbody>${rows(us)}</tbody></table>`}
+  if(tab=='Unidade')return `<h2>Apto ${u.num} · Torre ${u.t}</h2><p class="sub">${esc(u.nome)}</p>${unitDl(u,true)}<h3>Contato</h3><p class="sub">(41) 9${String(8000+u.vaga*7).slice(0,4)}-${String(1000+u.vaga*13).slice(-4)} · ${esc(u.nome.split(' ')[0].toLowerCase())}@email.com</p>`;
+  if(tab=='Histórico')return `<h2>Histórico</h2>${chamadosList(c=>c.u==u.id)}<h3>Financeiro</h3><div class="list">${['Nov','Out','Set'].map((m,i)=>`<div class="item"><strong>${m}/2026 · R$ 486,20</strong>${tag(u.inad&&i==0?'Inadimplente':'Pago')}</div>`).join('')}</div>`}
+ if(r=='construtora'){
+  if(tab=='Obra'){const done=towers.filter(t=>obra[t.n]==100).length;return `<h2>${done} de 28 torres concluídas</h2><p class="sub">Avanço físico por torre</p>${[...towers].sort((a,b)=>a.n-b.n).map(t=>`<div style="font-size:13px;margin-top:7px;cursor:pointer" data-tw="${t.n}">Torre ${String(t.n).padStart(2,'0')} · ${obra[t.n]}%<div class="bar"><i style="width:${obra[t.n]}%;background:${obra[t.n]==100?'var(--brand)':'var(--amber)'}"></i></div></div>`).join('')}`}
+  if(tab=='Assistência')return `<h2>Assistência técnica</h2><p class="sub">Chamados de garantia abertos pelos moradores</p>${chamadosList(c=>c.tipo=='Assistência técnica'&&(!t||U(c.u).t==t))}`;
+  if(tab=='Entregas'){const e=units.filter(x=>x.ent=='Entregue').length,v=units.filter(x=>x.ent=='Vistoria agendada');return `<h2>${e} unidades entregues</h2>${kpis([[String(e),'Entregues'],[String(v.length),'Vistorias agendadas'],[String(units.filter(x=>x.ent=='Aguardando').length),'Aguardando obra'],['448','Vagas vinculadas']])}<h3>Próximas vistorias</h3><table><tbody>${v.slice(0,12).map(x=>`<tr class="click" data-u="${x.id}"><td>T${x.t} · ${x.num}</td><td>${esc(x.nome)}</td></tr>`).join('')}</tbody></table>`}
+  if(tab=='Documentos')return `<h2>Documentos do empreendimento</h2><div class="list">${[['Implantação e vinculação de vagas','Prancha 03/22 · PDF'],['Planta tipo · 3 quartos','Unidade 304'],['Manual do proprietário','A enviar'],['Habite-se por torre','A enviar']].map(([a,b])=>`<div class="item"><div><strong>${a}</strong><p>${b}</p></div></div>`).join('')}</div>`;
+  if(tab=='Torre')return `<h2>Torre ${t} · ${obra[t]}%</h2><p class="sub">Clique num apartamento para ver a planta</p><div class="bar"><i style="width:${obra[t]}%"></i></div>${kpis([[String(units.filter(x=>x.t==t&&x.ent=='Entregue').length),'Entregues'],[String(state.chamados.filter(c=>U(c.u).t==t&&c.tipo=='Assistência técnica').length),'Chamados de garantia']])}`;
+  if(tab=='Unidade')return `<h2>Apto ${u.num} · Torre ${u.t}</h2><p class="sub">Proprietário: ${esc(u.nome)}</p>${unitDl(u,false)}`}
+ return ''}
+function rows(L){return L.map(x=>`<tr class="click" data-u="${x.id}"><td>T${x.t}·${x.num}</td><td>${esc(x.nome)}</td><td>${tag(x.occ=='Vago'||x.occ=='Em obra'?x.occ:x.inad?'Inadimplente':'Em dia')}</td></tr>`).join('')}
+function render(){const r=state.role;$('#who').textContent={morador:'Morador exemplo · Torre 1, apto 304',sindico:'Síndico · gestão 2026',construtora:'Construtora · pós-obra'}[r];
+ const tabs=TABS[r][state.view];if(state.tab>=tabs.length)state.tab=0;
+ $('#tabs').innerHTML=tabs.map((t,i)=>`<button role="tab" aria-selected="${i==state.tab}" data-tab="${i}">${t}</button>`).join('');
+ $('#panel').innerHTML=view()+'<p class="note">Dados de exemplo para demonstração. Implantação e planta extraídas dos projetos enviados.</p>';
+ const cr=[['Condomínio',goSite]];if(state.tower)cr.push([`Torre ${state.tower}`,()=>goTower(state.tower)]);if(state.unit)cr.push([`Apto ${U(state.unit).num}`,()=>{}]);
+ $('#crumbs').innerHTML='';cr.forEach(([l,f])=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;$('#crumbs').appendChild(b)});
+ $('#modes').style.display=state.view=='unit'?'none':'';
+ $('#hint').textContent=state.view=='site'?'Arraste para girar · role para aproximar · clique numa torre':state.view=='tower'?'Clique num apartamento para abrir a planta 3D':'Arraste para girar a planta'}
+$('#tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b){state.tab=+b.dataset.tab;render()}};
+$('#panel').addEventListener('click',e=>{const a=e.target.closest('[data-adv]'),r=e.target.closest('[data-u]'),ap=e.target.closest('[data-apr]'),tw=e.target.closest('[data-tw]');
+ if(e.target.id=='gome')goUnit(ME);
+ if(a){const c=state.chamados.find(x=>x.id==a.dataset.adv);c.s=FLOW[Math.min(FLOW.indexOf(c.s)+1,3)];render();paint()}
+ if(ap){state.reservas[ap.dataset.apr].s='Aprovada';render()}
+ if(r)goUnit(r.dataset.u);if(tw)goTower(+tw.dataset.tw)});
+$('#panel').addEventListener('submit',e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
+ if(e.target.id=='fch')state.chamados.unshift({id:1032+state.chamados.length,u:state.unit||ME,tipo:f.tipo,d:f.d,s:'Aberto'});
+ if(e.target.id=='fres')state.reservas.push({a:f.a,d:f.d,u:ME,s:'Pendente'});
+ if(e.target.id=='fav')state.avisos.unshift({t:f.t,d:f.d,q:'agora'});render();paint()});
+$('#panel').addEventListener('input',e=>{if(e.target.id!='q')return;const q=e.target.value.toLowerCase();
+ $('#tb').innerHTML=rows(units.filter(x=>(!state.tower||x.t==state.tower)&&(`t${x.t} ${x.num} torre ${x.t} ${x.nome}`).toLowerCase().includes(q)).slice(0,80))});
+function setRole(r){state.role=r;state.tab=0;document.querySelectorAll('.roles button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role==r));
+ mode=MODES[r][0][0];$('#mode').innerHTML=MODES[r].map(([k,l])=>`<option value="${k}">Colorir por: ${l}</option>`).join('');
+ towers.forEach(t=>t.lb.classList.toggle('me',r=='morador'&&t.n==1));paint();
+ if(r=='morador'&&state.unit&&state.unit!=ME)goSite();else render()}
+document.querySelectorAll('.roles button').forEach(b=>b.onclick=()=>setRole(b.dataset.role));
+$('#mode').onchange=e=>{mode=e.target.value;paint()};
+
+/* ---------- Loop ---------- */
+const v3=new THREE.Vector3();
+function size(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+const ro=new ResizeObserver(size);ro.observe(stage);
+function project(obj,el,dy=0){obj.getWorldPosition(v3);v3.y+=dy;v3.project(cam);if(v3.z>1){el.style.display='none';return}
+ el.style.display='';el.style.left=(v3.x+1)/2*stage.clientWidth+'px';el.style.top=(1-v3.y)/2*stage.clientHeight+'px'}
+function loop(now){requestAnimationFrame(loop);
+ for(let i=tweens.length-1;i>=0;i--){const w=tweens[i];const k=(now-w.t0)/w.dur;if(k<0)continue;w.fn(Math.min(1,k));if(k>=1){tweens.splice(i,1);w.res()}}
+ ctr.update();const sv=site.visible&&state.view!='unit';
+ towers.forEach(t=>{if(!sv||(state.view=='tower'&&t.n!=state.tower)){t.lb.style.display='none';return}project(t.floors[3],t.lb,FH+1.5)});
+ {const o=new THREE.Vector3(),n=new THREE.Vector3(0,0,-60);o.project(cam);n.project(cam);$('#north i').style.transform=`rotate(${Math.atan2(n.x-o.x,(n.y-o.y)*cam.aspect)}rad)`}
+ if(plan.visible&&plan.userData.rl)plan.userData.rl.forEach(r=>project(r.o,r.e,.3));
+ renderer.render(scene,cam)}
+setRole('morador');size();
+cam.position.set(-420,360,460);ctr.target.set(0,0,0);requestAnimationFrame(loop);
+// abertura: torres sobem da maquete e a câmera desce
+towers.forEach(t=>{const d=Math.hypot(t.x+60,t.z);t.floors.forEach((fl,i)=>tween(650,k=>{fl.scale.y=Math.max(.001,ease(k))},300+d*6+i*110))});
+fly(HOME[0],HOME[1],2600);
+}
+</script>
+</body>
+</html>
