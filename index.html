@@ -216,7 +216,7 @@ const renderer=new THREE.WebGLRenderer({canvas,antialias:true});renderer.setPixe
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.92;
 const scene=new THREE.Scene();
-const cam=new THREE.PerspectiveCamera(38,1,0.5,3000);
+const cam=new THREE.PerspectiveCamera(38,1,1.5,2200);
 const ctr=new THREE.OrbitControls(cam,canvas);ctr.enableDamping=true;ctr.maxPolarAngle=1.48;ctr.minDistance=6;ctr.maxDistance=520;
 const hemi=new THREE.HemisphereLight(0xe4f0ff,0x6b7d5c,.45);scene.add(hemi);
 // Curitiba fica a 25°S: o sol da tarde vem do norte-noroeste
@@ -261,12 +261,12 @@ flat(LOT,0x8fae78,0.02);flat(APP,0x4d6e43,0.01);
 const RD=[[1560,190],[1250,232],[215,232],[215,600],[660,600],[1065,245]];
 const road=(pts,w,col,y)=>{const a=[];for(let i=0;i<pts.length-1;i++){const[p,q]=W(...pts[i]),[r,s]=W(...pts[i+1]);const L=Math.hypot(r-p,s-q);
  a.push(gb(L+w,.06,w,0,0,0,-Math.atan2(s-q,r-p)).translate((p+r)/2,y,(q+s)/2))}site.add(mesh(a,M(col,{roughness:.95}),false))};
-road(RD,21,0x74787a,.05);road(RD,7,0x4e5355,.08);road([[640,232],[640,30]],9,0x4e5355,.08);
-road([[-300,18],[1760,40]],13,0x3f4345,.04);road([[-300,30],[1760,52]],17,0xc9c6bf,.03);road([[45,22],[45,1100]],10,0x3f4345,.04);
+road(RD,21,0x74787a,.05);road(RD,7,0x4e5355,.08);road([[640,232],[640,52]],9,0x4e5355,.08);
+road([[-300,18],[1760,40]],13,0x3f4345,.09);road([[-300,30],[1760,52]],17,0xc9c6bf,0);road([[45,22],[45,1100]],10,0x3f4345,.09);
 // demarcação das vagas (448 vagas de moradores no quadro de vagas)
 {const o=new THREE.Object3D(),mats=[];for(let i=0;i<RD.length-1;i++){const[p,q]=W(...RD[i]),[r,s]=W(...RD[i+1]);const L=Math.hypot(r-p,s-q),ux=(r-p)/L,uz=(s-q)/L,ang=-Math.atan2(s-q,r-p);
  for(let d=6;d<L-6;d+=2.5)for(const side of[-1,1]){o.position.set(p+ux*d-uz*side*7,.1,q+uz*d+ux*side*7);o.rotation.set(0,ang,0);o.updateMatrix();mats.push(o.matrix.clone())}}
- const im=new THREE.InstancedMesh(new THREE.BoxGeometry(.12,.02,5),M(0xf2f2ee),mats.length);mats.forEach((m,i)=>im.setMatrixAt(i,m));site.add(im)}
+ const im=new THREE.InstancedMesh(new THREE.BoxGeometry(.12,.02,5),M(0xf2f2ee,{polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}),mats.length);mats.forEach((m,i)=>im.setMatrixAt(i,m));site.add(im)}
 // gradil preto no perímetro
 {const a=[];LOT.forEach((p,i)=>{const[x1,z1]=W(...p),[x2,z2]=W(...LOT[(i+1)%LOT.length]);const L=Math.hypot(x2-x1,z2-z1);a.push(gb(L,2,.08,0,0,0,-Math.atan2(z2-z1,x2-x1)).translate((x1+x2)/2,1,(z1+z2)/2))});
  site.add(mesh(a,M(0x1f2326,{transparent:true,opacity:.55,roughness:.6}),false))}
@@ -313,7 +313,7 @@ const COL=new THREE.Color();
 const cg=(w,h,d,x,y,z,c)=>{const g=gb(w,h,d,x,y,z);COL.set(c);const n=g.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){a[i*3]=COL.r;a[i*3+1]=COL.g;a[i*3+2]=COL.b}g.setAttribute('color',new THREE.BufferAttribute(a,3));return g};
 const K={band:0xe7e4dd,taupe:0x6d6259,frame:0x2a2e31,plinth:0x8d887f,sill:0xdcd8cf,ac:0xc6c9cb,grille:0x3b3631,roof:0xb7bab8,white:0xf1efe9};
 const MAT={det:()=>M(0xffffff,{vertexColors:true,transparent:true,roughness:.8}),
- glass:()=>M(0x1b2731,{transparent:true,metalness:.85,roughness:.07,envMapIntensity:1.5}),
+ glass:()=>M(0x1b2731,{transparent:true,metalness:.85,roughness:.07,envMapIntensity:1.5,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-2}),
  rail:()=>M(0xbfd8e2,{transparent:true,opacity:.32,metalness:.2,roughness:.05,envMapIntensity:1.2})};
 // janela: caixilho escuro, vidro recuado, montante central e peitoril
 function janela(det,glass,ax,f0,s,u,y,w,h,ac){// ax 'z': fachada em z=f0, eixo u = x ; ax 'x': fachada em x=f0, eixo u = z
@@ -321,7 +321,7 @@ function janela(det,glass,ax,f0,s,u,y,w,h,ac){// ax 'z': fachada em z=f0, eixo u
  det.push(cg(...P(u,y+h/2,.04,w+.1,t,d),K.frame),cg(...P(u,y-h/2,.04,w+.1,t,d),K.frame),cg(...P(u-w/2,y,.04,t,h,d),K.frame),cg(...P(u+w/2,y,.04,t,h,d),K.frame));
  if(w>.9)det.push(cg(...P(u,y,.03,.045,h,.08),K.frame));
  det.push(cg(...P(u,y-h/2-.07,.1,w+.24,.05,.22),K.sill));
- glass.push(gb(...P(u,y,-.01,w,h,.04)));
+ glass.push(gb(...P(u,y,.02,w,h,.03)));
  if(ac)det.push(cg(...P(u+s*0+(w/2+.55),y-h/2+.2,.2,.78,.52,.3),K.ac))}
 towers.forEach(t=>{const grp=new THREE.Group();grp.position.set(t.x,0,t.z);grp.rotation.y=t.rot;site.add(grp);t.g=grp;t.floors=[];t.units=[];t.solid=[];
  {const p=new THREE.Mesh(gb(t.w+8,.3,t.d+8,0,.15,0),M(0xd6d3cb,{roughness:.95}));p.receiveShadow=true;grp.add(p);
@@ -330,7 +330,7 @@ towers.forEach(t=>{const grp=new THREE.Group();grp.position.set(t.x,0,t.z);grp.r
  for(let f=1;f<=4;f++){const fl=new THREE.Group();fl.position.y=.3+(f-1)*FH;grp.add(fl);t.floors.push(fl);
   const det=[cg(t.w+.5,.28,t.d+.5,0,FH-.14,0,K.band),cg(2.6,FH,t.d+.6,0,FH/2,0,K.taupe)],glass=[],rail=[];
   // núcleo de escadas: venezianas nas duas faces; no térreo, porta de vidro e marquise
-  for(const s of[-1,1]){if(f==1&&s==1){glass.push(gb(1.7,2.25,.05,0,1.12,fz+.02));det.push(cg(1.9,.08,.1,0,2.3,fz+.05,K.frame),cg(3.4,.16,1.9,0,2.55,fz+.95,K.taupe),cg(.12,2.5,.12,-1.5,1.25,fz+1.75,K.frame),cg(.12,2.5,.12,1.5,1.25,fz+1.75,K.frame));continue}
+  for(const s of[-1,1]){if(f==1&&s==1){glass.push(gb(1.7,2.25,.05,0,1.12,fz+.045));det.push(cg(1.9,.08,.1,0,2.3,fz+.05,K.frame),cg(3.4,.16,1.9,0,2.55,fz+.95,K.taupe),cg(.12,2.5,.12,-1.5,1.25,fz+1.75,K.frame),cg(.12,2.5,.12,1.5,1.25,fz+1.75,K.frame));continue}
    for(let i=0;i<8;i++)det.push(cg(1.9,.05,.07,0,.55+i*.27,s*(fz+.03),K.grille))}
   if(f==1)det.push(cg(t.w+.1,.5,t.d+.1,0,.25,0,K.plinth));
   [[1,-1,1],[2,-1,-1],[3,1,-1],[4,1,1]].forEach(([p,sx,sz],i)=>{const u=U(`T${t.n}-${f}0${p}`);
@@ -343,7 +343,7 @@ towers.forEach(t=>{const grp=new THREE.Group();grp.position.set(t.x,0,t.z);grp.r
    const bz=cz+sz*ud*.2,bx=x0+sx*.67;
    det.push(cg(1.35,.16,2.7,bx,.08,bz,K.white),cg(1.35,h,.16,bx,h/2,bz-1.35,K.taupe),cg(1.35,h,.16,bx,h/2,bz+1.35,K.taupe),cg(.06,.05,2.55,x0+sx*1.3,1.1,bz,K.frame));
    det.push(cg(.06,2.15,.06,x0+sx*.03,1.08,bz-.85,K.frame),cg(.06,2.15,.06,x0+sx*.03,1.08,bz+.85,K.frame),cg(.06,.06,1.76,x0+sx*.03,2.15,bz,K.frame),cg(.06,2.15,.05,x0+sx*.03,1.08,bz,K.frame));
-   glass.push(gb(.04,2.1,1.7,x0+sx*.01,1.05,bz));rail.push(gb(.03,1.0,2.55,x0+sx*1.28,.6,bz))});
+   glass.push(gb(.04,2.1,1.7,x0+sx*.035,1.05,bz));rail.push(gb(.03,1.0,2.55,x0+sx*1.28,.6,bz))});
   if(f==4){for(const s of[-1,1]){det.push(cg(t.w+.3,.9,.2,0,FH+.45,s*(t.d/2+.05),K.white),cg(.2,.9,t.d+.3,s*(t.w/2+.05),FH+.45,0,K.white),
     cg(t.w+.45,.07,.32,0,FH+.93,s*(t.d/2+.05),K.band),cg(.32,.07,t.d+.45,s*(t.w/2+.05),FH+.93,0,K.band))}
    det.push(cg(t.w-.2,.06,t.d-.2,0,FH+.03,0,K.roof),cg(2.6,2.6,4.2,0,FH+1.3,0,K.taupe),cg(2.8,.08,4.4,0,FH+2.64,0,K.band),
